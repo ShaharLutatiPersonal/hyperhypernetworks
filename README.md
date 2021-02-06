@@ -1,13 +1,14 @@
 # hyperhypernetworks
 ICML Reproducibility code for hyperhypernetworks
+
 ## Prerequisite
-pytorch (verified on 1.7.0)
-numpy
-scipy
-scikit-learn
-ResNet pytorch https://github.com/FrancescoSaverioZuppichini/ResNet
-MS-SSIM pytorch https://github.com/VainF/pytorch-msssim
-DETR https://github.com/facebookresearch/detr
+1. pytorch (verified on 1.7.0)
+2. numpy
+3. scipy
+4. scikit-learn
+5. ResNet pytorch https://github.com/FrancescoSaverioZuppichini/ResNet
+6. MS-SSIM pytorch https://github.com/VainF/pytorch-msssim
+7. DETR https://github.com/facebookresearch/detr
 
 ## Models
 cd \models:
