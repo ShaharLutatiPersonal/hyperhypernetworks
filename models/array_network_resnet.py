@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 from loss import array_gain_calc as ag_calc
-import transformer
-import position_encoding
 import resnet
 import math
 fc = [dict(),dict(),dict(),dict()]
