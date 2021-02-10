@@ -112,21 +112,12 @@ class simulator_cnn(nn.Module):
         kernel_size_first_conv = 3
         self.relu = nn.ReLU()
         self.hypernet = hypernet(kernel_size_first_conv,16,1)
-        #self.decimation_conv = nn.Conv2d(in_channels=16,out_channels=3,kernel_size=kernel_size_first_conv,bias=False)
-        #for p in self.decimation_conv.parameters():
-        #    if p.requires_grad:
-        #        p.requires_grad_(False)
         self.elu = nn.ELU()
         self.downscale = nn.Conv2d(in_channels=1,out_channels=1,kernel_size=3,bias=True)
         self.net = nn.Sequential(nn.Dropout2d(0.3),resnet.ResNetBasicBlock(1,32),nn.Dropout2d(0.3),resnet.ResNetBasicBlock(32,1),nn.Dropout2d(0.3),resnet.ResNetBasicBlock(32,1))
         self.linear = nn.Linear(in_features= 60*60,out_features= 64*64,bias=True)
         self.deep_cnn_2 = nn.Conv2d(in_channels=1,out_channels=1,kernel_size= 1,bias=True)
-
-        #self.gn = nn.GroupNorm(1,1,1e-8)
-
-        
         torch.nn.init.kaiming_uniform_(self.downscale.weight)
-        #torch.nn.init.kaiming_uniform_(self.deep_cnn_2.weight)
         torch.nn.init.kaiming_uniform_(self.linear.weight)
     def forward(self,inp):
         input_s,vector = inp
@@ -141,15 +132,10 @@ class simulator_cnn(nn.Module):
                 output_batchified = output
             else:
                 output_batchified = torch.cat((output_batchified,output),dim=0)
-        #print(output.shape)
         output = self.elu(self.downscale(output_batchified))
         output = (self.elu(self.net(output)))
-        #print(output.shape)
         output = self.elu(self.linear(output.view(batch_size,-1)).view(batch_size,1,64,64))
-        #output = self.elu(self.linear(output.view(1,-1)))
         output = self.elu(self.deep_cnn_2(output))
-        #print(output.shape)
-
         return output
 
 
@@ -163,13 +149,10 @@ class hypernet(nn.Module):
         total_size = kernel_size*kernel_size*input_channels*output_channels
         self.linear_1 = nn.Linear(in_features=6,out_features= total_size,bias=True)
         self.linear_3 = nn.Linear(in_features= total_size,out_features= total_size,bias=True)
-        #self.linear_3 = nn.Linear(in_features=2*total_size,out_features=total_size,bias=False)
         torch.nn.init.kaiming_uniform_(self.linear_1.weight)
-        #torch.nn.init.kaiming_normal_(self.linear_2.weight)
         self.init_weight_network(self.linear_3.weight,3)
     def forward(self,input):
         output = self.elu(self.linear_1(input))
-        #output = self.elu(self.linear_2(output))
         output = self.elu(self.linear_3(output)).view(self.output_channels,self.input_channels,self.kernel_size,self.kernel_size)
         return output
     def init_weight_network(self,w,fan_out_dj):

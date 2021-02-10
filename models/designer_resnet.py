@@ -3,9 +3,6 @@ import torch.nn as nn
 import numpy as np
 import cost
 import resnet
-import transformer
-import position_encoding
-import math
 
 class designer_network(nn.Module):
     def __init__(self,fc_shape):
@@ -94,38 +91,32 @@ import resnet
 class hypernetwork_constarints(nn.Module):
     def __init__(self,fc_parameters):
         super(hypernetwork_constarints,self).__init__()
+        
+        self.relu = nn.ELU()
+        self.directivity_conv = nn.Sequential( resnet.ResNetBasicBlock(1,16),nn.MaxPool2d(2), resnet.ResNetBasicBlock(16,16),
+        resnet.ResNetBasicBlock(16,16), resnet.ResNetBasicBlock(16,1))
+        self.fc = nn.Linear(1024+3,1024)
         cnt = 0
-        hidden_dim = 128
-
-        for fcc in fc_parameters:
-            shape = fcc['shape']
+        for fc in fc_parameters:
+            shape = fc['shape']
             cnt += shape[0]*shape[1] + 2*shape[1]
-        self.backbone_0 =  nn.Sequential(nn.Conv2d(1,8,3),nn.ReLU(),
-        nn.Conv2d(8,8,3),nn.ReLU(),nn.Conv2d(8,8,3),nn.ReLU(), nn.Conv2d(8,hidden_dim,3),nn.ReLU(), nn.Conv2d(hidden_dim,hidden_dim,1))
-        self.activation = nn.ELU()
-        self.relu = nn.ReLU()
-        transformer_encod = nn.TransformerEncoderLayer(d_model=hidden_dim,nhead=4,dim_feedforward=2048,dropout=0.1)
-        self.transformer = nn.TransformerEncoder(transformer_encod,1)
-        self.conv11 = nn.Sequential(nn.Conv1d(3136,1,1))
-        self.hyp = nn.Identity()#nn.Linear(hidden_dim,hidden_dim)
-        self.linear_class_hyper = nn.Linear(hidden_dim*1,cnt)
-        self.pos = self.positionalencoding2d(d_model=hidden_dim, height=56, width=56).to('cuda')
-        self.hidden_dim = hidden_dim
-        self.gem = 64
-        self.sigmoid = nn.Identity()
-        self.init_weight_network(self.linear_class_hyper.weight,64)
-    def forward(self, inputs):
-        x = self.activation(self.backbone_0(inputs))
-        pos = self.pos
-        m = pos +x.squeeze()
-        m = m.permute(2,1,0)
-        m = m.contiguous().view(56**2,1,-1)
-        h = self.transformer(m).permute(1,0,2)
-        h = self.activation(self.conv11(h))
-        h = self.activation(self.hyp(h))
-        h = h.contiguous().view(1,-1)
-        linear_weights = self.activation(self.linear_class_hyper(h)).squeeze()
-        return linear_weights
+        
+        self.fc2 = nn.Linear(1024,cnt)
+        self.init_weight_network(self.fc2.weight,64)
+        #nn.init.kaiming_normal_(self.fc2.weight)
+        nn.init.kaiming_normal_(self.fc.weight)
+        #self.metal_plane_conv = nn.Sequential(conv_block([16,32,3]),nn.MaxPool2d(2),conv_block([32,16,3]),conv_block([16,8,3]),nn.MaxPool2d(2),conv_block([8,1,3]))
+        # size of metal plane = 121
+
+        
+    def forward(self,inputs):
+        directivity,s = inputs
+        directivity = self.directivity_conv(directivity)
+        concat = directivity.view(1,-1)
+        concat = torch.cat((concat,s),dim = 1)
+        concat = self.relu(self.fc(concat))
+        concat = self.relu(self.fc2(concat))
+        return concat
  
     def init_bias_network(self,w):
         with torch.no_grad():
@@ -140,29 +131,7 @@ class hypernetwork_constarints(nn.Module):
             fan_in = w.shape[0]
             a = torch.sqrt(torch.tensor(3/(fan_in*fan_out_dj)))
             return w.uniform_(-a,a)
-    def positionalencoding2d(self,d_model, height, width):
-        """
-        :param d_model: dimension of the model
-        :param height: height of the positions
-        :param width: width of the positions
-        :return: d_model*height*width position matrix
-        """
-        if d_model % 4 != 0:
-            raise ValueError("Cannot use sin/cos positional encoding with "
-                            "odd dimension (got dim={:d})".format(d_model))
-        pe = torch.zeros(d_model, height, width)
-        # Each dimension use half of d_model
-        d_model = int(d_model / 2)
-        div_term = torch.exp(torch.arange(0., d_model, 2) *
-                            -(math.log(10000.0) / d_model))
-        pos_w = torch.arange(0., width).unsqueeze(1)
-        pos_h = torch.arange(0., height).unsqueeze(1)
-        pe[0:d_model:2, :, :] = torch.sin(pos_w * div_term).transpose(0, 1).unsqueeze(1).repeat(1, height, 1)
-        pe[1:d_model:2, :, :] = torch.cos(pos_w * div_term).transpose(0, 1).unsqueeze(1).repeat(1, height, 1)
-        pe[d_model::2, :, :] = torch.sin(pos_h * div_term).transpose(0, 1).unsqueeze(2).repeat(1, 1, width)
-        pe[d_model + 1::2, :, :] = torch.cos(pos_h * div_term).transpose(0, 1).unsqueeze(2).repeat(1, 1, width)
 
-        return pe
 class conv_block(nn.Module):
     def __init__(self,init_shape):
         super(conv_block,self).__init__()

@@ -30,10 +30,9 @@ class block_entropy_calc(nn.Module):
                     self.change_block_weights(block)
                     loss = []
                     for b in range(self.batch_size):
-                        gen_input = self.gen_inputs(b)
-                        g_input,G,c,s = gen_input # This part should be changed for other architecture
-                        output = self.net(g_input,G,c,s) # This part should be changed for other architecture
-                        loss.append(self.loss(output,c.long()).item())
+                        gen_input,c = self.gen_inputs(b) # This part should be changed for other architecture
+                        output = self.net(gen_input) # This part should be changed for other architecture
+                        loss.append(self.loss(output,c).item())
                     self.H_max[i] = self.calculate_Hmax(loss,self.testing_vec,self.H_max[i])
                 print('block {} , {}/{}'.format(block,i,len(self.names)-1))
         return np.array(self.H_max)/np.max(self.H_max)
