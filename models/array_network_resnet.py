@@ -67,7 +67,7 @@ class resnet_hyperhyper_variant(nn.Module):
     def init_weight_network(self,w,fan_out_dj):
         with torch.no_grad():
             fan_in = w.shape[0]
-            a = torch.sqrt(torch.tensor(3/(fan_in*fan_out_dj)))
+            a = torch.sqrt(torch.tensor(3*2/(fan_in*fan_out_dj)))
             return w.uniform_(-a,a)
 
 
