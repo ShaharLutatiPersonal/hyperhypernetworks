@@ -12,8 +12,6 @@ class block_entropy_calc(nn.Module):
         self.gen_inputs = input_generator
         self.loss = loss_func
         self.names = [n for n,p in self.net.named_modules() if hasattr(p,'weight')]
-        #self.names = self.fix_names(self.names)
-        #self.fix_2names()
         self.monte_carlo_num = monte_carlo_num
         self.batch_size = batch_size
         self.H_max = [-100 for i in self.names]

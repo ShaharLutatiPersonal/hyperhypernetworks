@@ -33,7 +33,7 @@ for i in range(6):
 array_factor = torch.tensor(factor).to('cuda')
 
 
-
+################## Utils for handeling database and losses ##########################
 
 import utils
 def show_image(x):
@@ -200,7 +200,7 @@ class MyRotationTransform:
         x.rotate(angle)
         return self.totensor(x)
 
-
+################## Training sequence ##########################
 model = array_network_resnet.resnet_hyperhyper_variant().to(device).float()
 lr = float(input('Learning rate?\n'))
 l1 = nn.L1Loss()

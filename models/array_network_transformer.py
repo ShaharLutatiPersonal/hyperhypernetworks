@@ -137,8 +137,7 @@ class hypernetwork_constraints(nn.Module):
         self.linear_1 = nn.Linear(in_features = hidden_dim*3,out_features = 7816)
         self.activation = nn.ELU()
         nn.init.kaiming_normal_(self.linear_0.weight)
-        #nn.init.kaiming_normal(self.linear_1.weight)
-        self.init_hyperhyper(self.linear_1.weight,1)
+        self.init_hyperhyper(self.linear_1.weight,100*100*0.209)
     def forward(self,input):
         out = self.backbone(100*(1-input))
         #print(out.shape)

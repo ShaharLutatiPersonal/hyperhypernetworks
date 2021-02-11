@@ -1,4 +1,4 @@
--import torch
+import torch
 import torch.nn as nn
 import numpy as np
 import cost
@@ -139,8 +139,8 @@ class hypernetwork_constarints(nn.Module):
 
     def init_weight_network(self,w,fan_out_dj):
         with torch.no_grad():
-            fan_in = w.shape[0]
-            a = torch.sqrt(torch.tensor(3/(fan_in*fan_out_dj)))
+            fan_in = w.shape[1]
+            a = torch.sqrt(torch.tensor(3*2/(fan_in*fan_out_dj)))
             return w.uniform_(-a,a)
     def positionalencoding2d(self,d_model, height, width):
         """
@@ -189,8 +189,8 @@ class fc_block(nn.Module):
 
     def init_weight_network(self,w,fan_out_dj):
         with torch.no_grad():
-            fan_in = w.shape[0]
-            a = torch.sqrt(torch.tensor(3/(fan_in*fan_out_dj)))
+            fan_in = w.shape[1]
+            a = torch.sqrt(torch.tensor(3*2/(fan_in*fan_out_dj)))
             return w.uniform_(-a,a)
 
 
@@ -231,8 +231,8 @@ class fine_tuner_hyper(nn.Module):
 
     def init_weight_network(self,w,fan_out_dj):
         with torch.no_grad():
-            fan_in = w.shape[0]
-            a = torch.sqrt(torch.tensor(3/(fan_in*fan_out_dj)))
+            fan_in = w.shape[1]
+            a = torch.sqrt(torch.tensor(3*2/(fan_in*fan_out_dj)))
             return w.uniform_(-a,a)
 
 

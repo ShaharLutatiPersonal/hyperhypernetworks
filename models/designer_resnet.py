@@ -156,8 +156,8 @@ class fc_block(nn.Module):
 
     def init_weight_network(self,w,fan_out_dj):
         with torch.no_grad():
-            fan_in = w.shape[0]
-            a = torch.sqrt(torch.tensor(3/(fan_in*fan_out_dj)))
+            fan_in = w.shape[1]
+            a = torch.sqrt(torch.tensor(3*2/(fan_in*fan_out_dj)))
             return w.uniform_(-a,a)
 
 
