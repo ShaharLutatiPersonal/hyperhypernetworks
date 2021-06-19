@@ -1,5 +1,5 @@
-# hyperhypernetworks
-ICML Reproducibility code for HyperHyperNetwork Dor the Design Of Antenna Arrays
+# HyperHyperNetwork For the Design Of Antenna Arrays
+ICML Reproducibility code for HyperHyperNetwork For the Design Of Antenna Arrays
 https://arxiv.org/abs/2105.03838
 
 ## Prerequisite
