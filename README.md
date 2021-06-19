@@ -1,5 +1,6 @@
 # hyperhypernetworks
-ICML Reproducibility code for hyperhypernetworks
+ICML Reproducibility code for HyperHyperNetwork Dor the Design Of Antenna Arrays
+https://arxiv.org/abs/2105.03838
 
 ## Prerequisite
 1. pytorch (verified on 1.7.0)
